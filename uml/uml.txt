@@ -1,0 +1,67 @@
+@startuml
+
+title When to use ConcurrentHashMap?
+
+class Plane implements Vehicle
+
+
+interface util.Callable
+class VehicleDistributor implements util.Callable {
+    VehicleDistributor(plane, OPERATION);
+    Vehicle call();
+}
+class VehicleDistributor
+note left
+    //will run in many threads, calling vehicleService
+    //that is why persistance model in VehicleService
+    // must be thread save
+    //the call method below is called by executor (creates
+    //threads and execute them)
+    Vehicle call() 
+        if(ARRIVAL)
+            planeService.arrivalQueue(vehicle)
+        else if ...
+end note
+
+interface DistributionVehicleService {
+    arrivalQueue(vehicle);
+    unloadInProgress(vehicle);
+    departureQueue(vehicle);
+}
+
+class DistributionPlaneService extends DistributionVehicleService {
+    ConcurrentHashMap<Plane, Long> queue;
+}
+class DistributionPlaneService 
+note right
+    //NOTE: we are using thread save persistance:
+    //ConcurrentHashMap
+    void arrivalQueue(plane) 
+        
+end note
+enum OPERATION {
+    ARRIVAL,
+    DEPARTURE,
+    INPROGRESS
+}
+
+class main
+note right
+    nbr_planes = 500;
+    planeList = new Plane[nbr_planes];
+    {create 500 planes}
+    executor = Executors.newFixedThreadPool(nbr_planes);
+    vehicleDistributorList = new ..[nbr_planes];
+    for(nbr_planes) 
+        planeList[i] = executor.submit(vehicleDistributorList[i]).get();
+    for(nbr_planes) 
+        ...
+     ...
+end note
+
+VehicleDistributor -right-> DistributionVehicleService
+VehicleDistributor -left-> Plane
+VehicleDistributor *-down-> OPERATION
+
+
+@enduml
